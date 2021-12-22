@@ -12,7 +12,7 @@ public struct SideEffectContext<S: State, D: Dependencies> {
   
   private let dispatchClosure: AnyDispatch
   
-  let dependencies: D
+  public let dependencies: D
   
   init(dependencies: D, getState: @escaping () -> S, dispatch: @escaping AnyDispatch) {
     self.getStateClosure = getState
