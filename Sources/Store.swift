@@ -11,7 +11,7 @@ import Foundation
 public class Store<S: State, D: Dependencies> {
   @Published var state: S
   
-  let dependencies: D
+  public let dependencies: D
   
   var sideEffectContext: SideEffectContext<S, D> {
     SideEffectContext(dependencies: dependencies, getState: getStateClosure, dispatch: anyDispatchClosure)
