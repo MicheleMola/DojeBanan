@@ -13,8 +13,4 @@ public protocol Dispatchable {}
 
 public typealias AnyDispatch = (_: Dispatchable) async throws -> Void
 
-public protocol ViewModel {
-  func subscribe()
-  
-  func unsubscribe()
-}
+public protocol LocalState {}
