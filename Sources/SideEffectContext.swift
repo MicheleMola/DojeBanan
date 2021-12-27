@@ -24,9 +24,19 @@ public struct SideEffectContext<S: State, D: Dependencies> {
     getStateClosure()
   }
   
-  public func dispatch(_ dispatchable: Dispatchable) {
+  public func dispatch<T: ReturningSideEffect>(_ dispatchable: T) async throws -> T.ReturnType {
+    try await dispatchClosure(dispatchable) as! T.ReturnType
+  }
+  
+  public func dispatch<T: SideEffect>(_ dispatchable: T) -> Void {
     Task(priority: .background) {
-      try? await dispatchClosure(dispatchable)
+      try await dispatchClosure(dispatchable)
+    }
+  }
+  
+  public func dispatch<T: StateUpdater>(_ dispatchable: T) -> Void {
+    Task(priority: .background) {
+      try await dispatchClosure(dispatchable)
     }
   }
 }
