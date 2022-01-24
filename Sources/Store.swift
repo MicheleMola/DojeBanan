@@ -33,18 +33,8 @@ public class Store<S: State, D: Dependencies> {
       try await self.anyDispatch(dispatchable)
     }
   }
-    
-  public func dispatch<T: ReturningSideEffect>(_ dispatchable: T) async throws -> T.ReturnType {
-    try await self.anyDispatch(dispatchable) as! T.ReturnType
-  }
   
   public func dispatch<T: SideEffect>(_ dispatchable: T) -> Void {
-    Task(priority: .background) {
-      try await self.anyDispatch(dispatchable)
-    }
-  }
-  
-  public func dispatch<T: StateUpdater>(_ dispatchable: T) -> Void {
     Task(priority: .background) {
       try await self.anyDispatch(dispatchable)
     }
