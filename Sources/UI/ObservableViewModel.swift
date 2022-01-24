@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-open class ObservableViewModel<S: State, D: Dependencies>: ViewModelWithStore {
+open class ObservableViewModelWithStore<S: State, D: Dependencies>: ViewModelWithStore {
   public let store: Store<S, D>
   
   private var cancellable = Set<AnyCancellable>()
@@ -43,6 +43,32 @@ open class ObservableViewModelWithLocalState<S: State, D: Dependencies, LS: Loca
   required public init(store: Store<S, D>, localState: LS) {
     self.store = store
     self.localState = localState
+  }
+  
+  open func update(state: S) {}
+  
+  public func subscribe() {
+    self.store.$state
+      .receive(on: DispatchQueue.main)
+      .print("\(Self.self)")
+      .sink { [weak self] updatedState in
+        self?.update(state: updatedState)
+      }
+      .store(in: &cancellable)
+  }
+  
+  public func unsubscribe() {
+    cancellable.removeAll()
+  }
+}
+
+open class ObservableViewModel<S: State, D: Dependencies>: ViewModel {
+  public let store: Store<S, D>
+  
+  private var cancellable = Set<AnyCancellable>()
+  
+  required public init(store: Store<S, D>) {
+    self.store = store
   }
   
   open func update(state: S) {}
