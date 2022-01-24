@@ -10,7 +10,7 @@ import Foundation
 public protocol StateUpdater: AnyStateUpdater {
   associatedtype S: State
 
-  func update(_ state: inout S)
+  func updateState(_ state: inout S)
 }
 
 public protocol AnyStateUpdater: Dispatchable {
@@ -23,7 +23,7 @@ public extension StateUpdater {
       fatalError("Invalid State type.")
     }
     
-    update(&typedState)
+    updateState(&typedState)
     return typedState
   }
 }

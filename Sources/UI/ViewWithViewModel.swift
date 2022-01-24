@@ -7,13 +7,19 @@
 
 import SwiftUI
 
-public struct ViewWithViewModel<VM: ViewModel, C: View>: View {
+public protocol ViewModel {
+  func subscribe()
+  
+  func unsubscribe()
+}
+
+public struct ViewWithViewModel<VM: ViewModel, V: View>: View {
   let viewModel: VM
-  let content: () -> C
+  let content: () -> V
   
   public init(
     viewModel: VM,
-    @ViewBuilder content: @escaping () -> C
+    @ViewBuilder content: @escaping () -> V
   ) {
     self.viewModel = viewModel
     self.content = content

@@ -30,15 +30,30 @@ public class Store<S: State, D: Dependencies> {
   
   private var anyDispatchClosure: AnyDispatch {
     return { [unowned self] dispatchable in
-      self.dispatch(dispatchable)
+      try await self.anyDispatch(dispatchable)
     }
   }
     
-  public func dispatch(_ dispatchable: Dispatchable) {
+  public func dispatch<T: ReturningSideEffect>(_ dispatchable: T) async throws -> T.ReturnType {
+    try await self.anyDispatch(dispatchable) as! T.ReturnType
+  }
+  
+  public func dispatch<T: SideEffect>(_ dispatchable: T) -> Void {
+    Task(priority: .background) {
+      try await self.anyDispatch(dispatchable)
+    }
+  }
+  
+  public func dispatch<T: StateUpdater>(_ dispatchable: T) -> Void {
+    Task(priority: .background) {
+      try await self.anyDispatch(dispatchable)
+    }
+  }
+  
+  @discardableResult
+  public func anyDispatch(_ dispatchable: Dispatchable) async throws -> Any {
     if let sideEffect = dispatchable as? AnySideEffect {
-      Task(priority: .background) {
-        try? await sideEffect.anySideEffect(sideEffectContext)
-      }
+      return try await sideEffect.anySideEffect(sideEffectContext)
     } else if let stateUpdater = dispatchable as? AnyStateUpdater {
       let newState = stateUpdater.anyUpdate(state)
       guard let typedNewState = newState as? S else {
@@ -46,6 +61,9 @@ public class Store<S: State, D: Dependencies> {
       }
       
       state = typedNewState
+      return ()
     }
+    
+    fatalError("Invalid parameter")
   }
 }
